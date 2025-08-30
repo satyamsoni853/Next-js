@@ -414,7 +414,7 @@ const Home = () => {
                 </div>
                 <p className="text-gray-500">Total Franchisees</p>
                 <div className="mt-4 flex justify-between space-x-4">
-                  <div className="flex-1 bg-gray-100 p-3 rounded-lg text-center">
+                  <div className="flex-1 bg-gray-100 p-5 rounded-lg text-center">
                     <p className="text-sm text-gray-500">Target</p>
                     <p className="font-semibold text-gray-800">$500,000</p>
                   </div>

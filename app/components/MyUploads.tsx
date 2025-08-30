@@ -1,9 +1,7 @@
 "use client";
-import React from "react";
+import React, { useState, useMemo } from "react";
 import {
-  FileText,
   FileImage,
-  FileBadge2,
   EllipsisVertical,
   MoreHorizontal,
   Search,
@@ -12,6 +10,8 @@ import {
   FileAudio2,
   FileBadge,
 } from "lucide-react"; // Using Lucide for a modern icon set
+import pdf from '../pdf.png'
+import doc from '../doc.png'
 
 interface Document {
   name: string;
@@ -40,7 +40,7 @@ const documents: Document[] = [
     aiInclusion: false,
     dashboardInclusion: true,
     stageAccess: "Onboarding",
-    icon: "jpg",
+    icon: "pdf",
   },
   {
     name: "Dashboard prototype recording.mp4",
@@ -49,7 +49,7 @@ const documents: Document[] = [
     aiInclusion: false,
     dashboardInclusion: true,
     stageAccess: "Franchisee",
-    icon: "mp4",
+    icon: "doc",
   },
   {
     name: "Financial Overview.docx",
@@ -76,7 +76,7 @@ const documents: Document[] = [
     aiInclusion: true,
     dashboardInclusion: true,
     stageAccess: "Onboarding",
-    icon: "aep",
+    icon: "pdf",
   },
   {
     name: "Briefing call recording.mp3",
@@ -85,15 +85,43 @@ const documents: Document[] = [
     aiInclusion: true,
     dashboardInclusion: true,
     stageAccess: "Prospect",
-    icon: "mp3",
+    icon: "pdf",
   },
 ];
 
 const App = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDocuments, setSelectedDocuments] = useState<Set<string>>(new Set());
+
+  const filteredDocuments = useMemo(() => {
+    return documents.filter((doc) =>
+      doc.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      const allDocumentNames = new Set(filteredDocuments.map((doc) => doc.name));
+      setSelectedDocuments(allDocumentNames);
+    } else {
+      setSelectedDocuments(new Set());
+    }
+  };
+
+  const handleSelect = (docName: string) => {
+    const newSelectedDocuments = new Set(selectedDocuments);
+    if (newSelectedDocuments.has(docName)) {
+      newSelectedDocuments.delete(docName);
+    } else {
+      newSelectedDocuments.add(docName);
+    }
+    setSelectedDocuments(newSelectedDocuments);
+  };
+
   const getIcon = (iconType: "pdf" | "jpg" | "mp4" | "mp3" | "doc" | "aep") => {
     switch (iconType) {
       case "pdf":
-        return <FileText className="h-6 w-6 text-red-500" />;
+        return <img src={pdf.src} alt="PDF Icon" className="h-6 w-6" />;
       case "jpg":
         return <FileImage className="h-6 w-6 text-green-500" />;
       case "mp4":
@@ -101,7 +129,7 @@ const App = () => {
       case "mp3":
         return <FileAudio2 className="h-6 w-6 text-purple-500" />;
       case "doc":
-        return <FileBadge2 className="h-6 w-6 text-indigo-500" />;
+        return <img src={doc.src} alt="DOC Icon" className="h-6 w-6" />;
       case "aep":
         return <FileBadge className="h-6 w-6 text-cyan-500" />;
       default:
@@ -139,10 +167,10 @@ const App = () => {
   );
 
   return (
-    <div className="flex  justify-center items-center min-h-screen bg-gray-100  ">
-      <div className="container p-4 w-full mt-4 bg-white rounded-3xl shadow-lg border  border-gray-200  ">
-        <div className="flex flex-col  sm:flex-row justify-between items-start sm:items-center mb-4">
-          <div  >
+    <div className="flex  justify-center  items-center min-h-screen bg-gray-100  ">
+      <div className="container  w-full rounded-2xl mt-4 bg-white  shadow-lg border  border-b-gray-200  ">
+        <div className="flex flex-col  p-4 border border-gray-200 sm:flex-row justify-between items-start sm:items-center ">
+          <div className=""  >
             <h3 className="font-bold text-2xl text-gray-800">My Uploads</h3>
             <p className="text-gray-500 text-sm">
               Documents that are uploaded by you.
@@ -152,12 +180,14 @@ const App = () => {
             <EllipsisVertical className="h-6 w-6" />
           </button>
         </div>
-        <div className="flex items-center space-x-4 mb-6">
+        <div className="flex items-center space-x-4 p-4 border border-gray-200 ">
           <div className="relative flex-1 w-full">
             <input
               type="text"
               placeholder="Search here..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-100 pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -168,14 +198,26 @@ const App = () => {
             <span>Filters</span>
           </button>
         </div>
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <div  >
+          <div className="overflow-x-auto  border border-gray-200">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+              
+                
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 flex items-end-safe gap-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 text-blue-600"
+                    onChange={handleSelectAll}
+                    checked={
+                      filteredDocuments.length > 0 &&
+                      selectedDocuments.size === filteredDocuments.length
+                    }
+                  />
                   Document Name
                 </th>
                 <th
@@ -186,13 +228,13 @@ const App = () => {
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell whitespace-nowrap"
                 >
                   AI App Inclusion
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell whitespace-nowrap"
                 >
                   Dashboard Inclusion
                 </th>
@@ -206,15 +248,21 @@ const App = () => {
                   scope="col"
                   className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  Actions
+                  {/* Actions */}
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {documents.map((doc, index) => (
+              {filteredDocuments.map((doc, index) => (
                 <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        className="form-checkbox h-4 w-4 text-blue-600 mr-4"
+                        checked={selectedDocuments.has(doc.name)}
+                        onChange={() => handleSelect(doc.name)}
+                      />
                       <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center">
                         {getIcon(doc.icon)}
                       </div>
@@ -268,7 +316,7 @@ const App = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <a href="#" className="text-red-600 hover:text-red-900">
+                    <a href="#" className="text-gray-600 hover:text-red-900">
                       Delete
                     </a>
                     <span className="text-gray-400 mx-2">|</span>
@@ -280,6 +328,7 @@ const App = () => {
               ))}
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>
